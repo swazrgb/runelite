@@ -29,6 +29,8 @@ import com.google.common.cache.CacheBuilder;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.security.AccessController;
+import java.security.PrivilegedExceptionAction;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 
@@ -169,10 +171,19 @@ class ConfigInvocationHandler implements InvocationHandler
 	static Object callDefaultMethod(Object proxy, Method method, Object[] args) throws Throwable
 	{
 		Class<?> declaringClass = method.getDeclaringClass();
-		return MethodHandles.privateLookupIn(declaringClass, MethodHandles.lookup())
-			.unreflectSpecial(method, declaringClass)
-			.bindTo(proxy)
-			.invokeWithArguments(args);
+		return AccessController.doPrivileged((PrivilegedExceptionAction<Object>) () -> {
+			try
+			{
+				return MethodHandles.privateLookupIn(declaringClass, MethodHandles.lookup())
+					.unreflectSpecial(method, declaringClass)
+					.bindTo(proxy)
+					.invokeWithArguments(args);
+			}
+			catch (Throwable t)
+			{
+				throw new RuntimeException(t);
+			}
+		});
 	}
 
 	void invalidate()

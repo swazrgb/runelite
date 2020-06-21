@@ -31,6 +31,8 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.util.OSType;
 import net.runelite.http.api.worlds.World;
@@ -50,19 +52,21 @@ public class Ping
 
 	public static int ping(String address)
 	{
-		try
-		{
-			if (OSType.getOSType() == OSType.Windows)
+		return AccessController.doPrivileged((PrivilegedAction<Integer>) () -> {
+			try
 			{
-				return windowsPing(address);
+				if (OSType.getOSType() == OSType.Windows)
+				{
+					return windowsPing(address);
+				}
+				return tcpPing(address);
 			}
-			return tcpPing(address);
-		}
-		catch (IOException ex)
-		{
-			log.warn("error pinging", ex);
-			return -1;
-		}
+			catch (IOException ex)
+			{
+				log.warn("error pinging", ex);
+				return -1;
+			}
+		});
 	}
 
 	private static int windowsPing(String worldAddress) throws UnknownHostException

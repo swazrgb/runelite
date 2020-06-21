@@ -79,7 +79,7 @@ public abstract class Plugin implements Module, ExtensionPoint
 	{
 		ImmutableSet.Builder<Subscription> builder = ImmutableSet.builder();
 
-		for (Method method : this.getClass().getDeclaredMethods())
+		for (Method method : this.getClass().getMethods())
 		{
 			Subscribe annotation = method.getAnnotation(Subscribe.class);
 			if (annotation == null)
@@ -99,7 +99,7 @@ public abstract class Plugin implements Module, ExtensionPoint
 				Sentry.capture("EventHandler " + method.toString()); // Spam Owain's inbox with this :)
 			}
 
-			method.setAccessible(true);
+//			method.setAccessible(true);
 
 			Subscription sub = new Subscription(type.asSubclass(Event.class), event -> method.invoke(this, event), annotation.takeUntil(), annotation.subscribe(), annotation.observe());
 

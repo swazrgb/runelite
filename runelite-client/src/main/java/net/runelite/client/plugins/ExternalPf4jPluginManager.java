@@ -11,6 +11,8 @@ import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.RuneLite;
 import net.runelite.client.RuneLiteProperties;
+import net.runelite.client.security.SecurityBasePluginLoader;
+import net.runelite.client.security.SecurityJarPluginLoader;
 import org.pf4j.BasePluginLoader;
 import org.pf4j.CompoundPluginLoader;
 import org.pf4j.CompoundPluginRepository;
@@ -109,8 +111,8 @@ class ExternalPf4jPluginManager extends DefaultPluginManager
 	protected PluginLoader createPluginLoader()
 	{
 		return new CompoundPluginLoader()
-			.add(new BasePluginLoader(this, new ExternalPluginClasspath()), this::isDevelopment)
-			.add(new JarPluginLoader(this), this::isNotDevelopment);
+			.add(new SecurityBasePluginLoader(this, new ExternalPluginClasspath()), this::isDevelopment)
+			.add(new SecurityJarPluginLoader(this), this::isNotDevelopment);
 	}
 
 	@Override

@@ -44,6 +44,11 @@ import java.net.Authenticator;
 import java.net.PasswordAuthentication;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.security.AllPermission;
+import java.security.CodeSource;
+import java.security.PermissionCollection;
+import java.security.Permissions;
+import java.security.Policy;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -87,6 +92,7 @@ import net.runelite.client.plugins.ExternalPluginManager;
 import net.runelite.client.plugins.PluginManager;
 import net.runelite.client.rs.ClientLoader;
 import net.runelite.client.rs.ClientUpdateCheckMode;
+import net.runelite.client.security.OPRSPolicy;
 import net.runelite.client.task.Scheduler;
 import net.runelite.client.ui.ClientUI;
 import net.runelite.client.ui.RuneLiteSplashScreen;
@@ -232,6 +238,8 @@ public class RuneLite
 
 	public static void main(String[] args) throws Exception
 	{
+		OPRSPolicy.useSecurity();
+
 		Locale.setDefault(Locale.ENGLISH);
 
 		final OptionParser parser = new OptionParser();
