@@ -36,7 +36,6 @@ import com.google.inject.Module;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -768,9 +767,10 @@ public class ExternalPluginManager
 		return scannedPlugins;
 	}
 
-	private Path stopPlugin(String pluginId)
+	private boolean stopPlugin(String pluginId)
 	{
 		List<PluginWrapper> startedPlugins = List.copyOf(getStartedPlugins());
+		boolean stopped = false;
 
 		for (PluginWrapper pluginWrapper : startedPlugins)
 		{
@@ -783,7 +783,7 @@ public class ExternalPluginManager
 
 			for (Plugin plugin : runelitePluginManager.getPlugins())
 			{
-				if (!extensions.get(0).getClass().getName().equals(plugin.getClass().getName()))
+				if (extensions.stream().noneMatch(e -> e.getClass().getName().equals(plugin.getClass().getName())))
 				{
 					continue;
 				}
@@ -806,17 +806,16 @@ public class ExternalPluginManager
 
 					eventBus.post(ExternalPluginChanged.class, new ExternalPluginChanged(pluginId, plugin, false));
 
-					return pluginWrapper.getPluginPath();
+					stopped = true;
 				}
 				catch (Exception ex)
 				{
 					log.warn("unable to stop plugin", ex);
-					return null;
 				}
 			}
 		}
 
-		return null;
+		return stopped;
 	}
 
 	public boolean install(String pluginId) throws VerifyException
@@ -896,9 +895,9 @@ public class ExternalPluginManager
 
 	public boolean uninstall(String pluginId, boolean skip)
 	{
-		Path pluginPath = stopPlugin(pluginId);
+		boolean stopped = stopPlugin(pluginId);
 
-		if (pluginPath == null)
+		if (!stopped)
 		{
 			return false;
 		}
